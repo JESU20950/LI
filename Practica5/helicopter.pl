@@ -37,12 +37,17 @@ main:- bestRouteSoFar(Km,ReverseRoute), reverse( ReverseRoute, Route ), nl,
 heli( _, AccumulatedDistance, _, _ ):- bestRouteSoFar(Distance,_),  AccumulatedDistance >= Distance, !, fail.
 
 % No passengers to pick up, no passengers left in helicopter -->  return to base
-heli( [], AccumulatedDistance, [CurrentPoint|RouteSoFar], [] ):- ...
+heli( [], AccumulatedDistance, [CurrentPoint|RouteSoFar], [] ):- helicopterBasePoint( BasePoint ), distanceBetweenTwoPoints(BasePoint,CurrentPoint, Distance),
+NewAccumulatedDistance is AccumulatedDistance+Distance, storeRouteIfBetter(NewAccumulatedDistance, [BasePoint,CurrentPoint|RouteSoFar]), fail.
 
 % Pick up another passenger:
-heli( PassengersToPickUp, AccumulatedDistance, [CurrentPoint|RouteSoFar], DestinationsOfPassengersInHelicopter ):- select([Origin,Destination], PassengersToPickUp, RestofPassengersToPickUp), distanceBetweenTwoPoints(Origin, CurrentPoint, Distance), NewAccumulatedDistance is AccumulatedDistance+Distance,
+heli( PassengersToPickUp, AccumulatedDistance, [CurrentPoint|RouteSoFar], DestinationsOfPassengersInHelicopter ):- length(DestinationsOfPassengersInHelicopter, S),
+S<2, select([Origin,Destination], PassengersToPickUp, RestofPassengersToPickUp), distanceBetweenTwoPoints(Origin, CurrentPoint, Distance), NewAccumulatedDistance is AccumulatedDistance+Distance,
 heli(RestofPassengersToPickUp,NewAccumulatedDistance, [Origin,CurrentPoint|RouteSoFar], [Destination|DestinationsOfPassengersInHelicopter]).
 
 % Drop off one of the passengers in the helicopter:
-heli( PassengersToPickUp, AccumulatedDistance, [CurrentPoint|RouteSoFar], DestinationsOfPassengersInHelicopter ):- ...
+heli( PassengersToPickUp, AccumulatedDistance, [CurrentPoint|RouteSoFar], DestinationsOfPassengersInHelicopter ):- 
+select(Destination, DestinationsOfPassengersInHelicopter, RestofDestinationsOfPassengersInHelicopter), 
+distanceBetweenTwoPoints(Destination, CurrentPoint, Distance), NewAccumulatedDistance is AccumulatedDistance+Distance,
+heli(PassengersToPickUp,NewAccumulatedDistance, [Destination,CurrentPoint|RouteSoFar], RestofDestinationsOfPassengersInHelicopter).
 
