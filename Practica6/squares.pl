@@ -13,11 +13,44 @@ main:-
     nl, write('Fitting all squares of size '), write(Sides), write(' into big square of size '), write(Big), nl,nl,
     length(Sides,N), 
     length(RowVars,N), % get list of N prolog vars: Row coordinates of each small square
+    length(ColVars,N), % get list of N prolog vars: Col coordinates of each small square
+    
     insideBigSquare(N,Big,Sides,RowVars),
     insideBigSquare(N,Big,Sides,ColVars),
+    write("hola"),
     nonoverlapping(N,Sides,RowVars,ColVars),
-    ...
+    write("hola"),
+    label(ColVars),
+    label(RowVars),
     displaySol(N,Sides,RowVars,ColVars), halt.
+
+insideBigSquare(_,_,[],[]):-!.
+insideBigSquare(_,Big,[Side|Sides], [X|Xs]):- R is Big-Side+1, [X] ins 1..R, 
+                                                   insideBigSquare(_,Big,Sides,Xs).
+                                                   
+                                                   
+nonoverlapping(0,_,_,_):-!.
+nonoverlapping(I,Sides,RowVars,ColVars):- nth1(I,Sides, Side),
+                                          nth1(I,RowVars, RowVar),
+                                          nth1(I,ColVars, ColVar),
+                                          select(ColVar,ColVars, RestofColVars),
+                                          select(RowVar,RowVars, RestofRowVars),
+                                          nonoverlapping_aux(Side,RowVar, RestofRowVars),
+                                          nonoverlapping_aux(Side,ColVar, RestofColVars),
+                                          I2 is I-1,
+                                          nonoverlapping(I2,Sides,RowVars,ColVars).
+
+ 
+nonoverlapping_aux(_,_, []):-!.
+nonoverlapping_aux(Side,RowVar, [RowVar|RowVars]):- Side2 is Side-1, 
+                                          write("i1"),
+                                           RowVar + Side2 #< RowVar,
+                                           write("i2"),
+                                           nonoverlapping_aux(Side,RowVar, RowVars).
+                                           
+
+
+
 
 
 displaySol(N,Sides,RowVars,ColVars):- 
